@@ -14,7 +14,10 @@ RUN --mount=type=cache,target=/root/.npm \
 # Stage 2: Builder
 FROM node:20-slim AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+# Install in builder stage directly (more reliable than copying node_modules between stages)
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=cache,target=/app/.next/cache \
