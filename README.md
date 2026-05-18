@@ -256,10 +256,8 @@ npm run test:watch # 👁️ Run tests in watch mode
 
 ---
 
-## 📄 License
+## License
 
-[MIT](LICENSE) © LinkVault
+MIT
 
-<div align="center">
-  <sub>Built with ❤️ by the LinkVault team</sub>
-</div>
+
