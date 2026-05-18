@@ -11,24 +11,50 @@ docker compose up --build
 ```
 
 **Key details:**
-- **Base image:** `node:20-alpine`
+- **Base image:** `node:20-slim` — glibc-based for maximum network compatibility (no `apk`/`apt-get` TLS issues).
 - **Builder stage:** installs ALL npm packages (not `--only=production`) because `next build` requires TypeScript, Tailwind, PostCSS, etc.
 - **Runner stage:** copies `.next/standalone`, static assets, and `node_modules` (needed for `better-sqlite3` native bindings which can't be bundled).
 - **Volumes:** `linkvault-data` (SQLite DB) and `linkvault-thumbs` (cached SVG fallbacks) persist across restarts.
-- **Healthcheck:** lightweight `GET /api/health` every 30s.
+- **Healthcheck:** lightweight Node.js `GET /api/health` every 30s (uses built-in `node`, no `wget`/`curl` needed).
+- **Init:** Docker Compose `init: true` replaces `dumb-init` for signal handling.
 
 **If modifying the Dockerfile:**
 - Never use `--only=production` in the stage that runs `npm run build`.
 - The runner needs `node_modules` because `better-sqlite3` has `.node` native bindings that Next.js standalone can't inline.
+- Do NOT add `apt-get` or `apk` package installs — this breaks on corporate/restricted networks. `better-sqlite3` ships prebuilt binaries; no compilation needed.
+
+### Pre-built Image (No Internet Required)
+
+For offline/air-gapped machines, export the image locally and transfer it:
+
+```bash
+# On a machine with internet:
+docker compose up -d --build
+docker save linkvault-linkvault:latest | gzip > linkvault-docker.tar.gz
+# Transfer linkvault-docker.tar.gz to the offline machine
+
+# On the offline machine:
+docker load < linkvault-docker.tar.gz
+docker compose up -d
+```
+
+### GitHub Container Registry (Instant Setup)
+
+A GitHub Action (`.github/workflows/docker-publish.yml`) auto-publishes to GHCR on every push to `main`. Users can pull instead of building:
+
+```bash
+docker pull ghcr.io/YOUR_USERNAME/linkvault:latest
+docker compose up -d
+```
 
 ### Local Development
 
 **Required Node version:** 20 LTS (see `.nvmrc`). Use `nvm use` or `fnm use` before installing.
 
-**Required native build tools:** `better-sqlite3` compiles C++ bindings. Every developer needs:
-- macOS: `xcode-select --install`
-- Ubuntu: `build-essential python3`
-- Windows: Visual Studio Build Tools + Python 3
+**Required native build tools:** `better-sqlite3` uses prebuilt binaries for most platforms. If a prebuild is missing for your architecture, it falls back to compiling:
+- macOS: `xcode-select --install` (usually already present)
+- Ubuntu: `build-essential python3` (rarely needed)
+- Windows: Visual Studio Build Tools + Python 3 (rarely needed)
 
 **Setup scripts:**
 - `setup.sh` — macOS/Linux. Checks Node version, warns about build tools, runs `npm install && npm run build`.

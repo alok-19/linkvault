@@ -45,20 +45,42 @@ docker compose up --build
 ```
 
 > 💡 Data persists in Docker volumes (`linkvault-data` and `linkvault-thumbs`).
+> No build tools (python3, make, g++) are needed — `better-sqlite3` ships prebuilt binaries.
 
-### 💻 Option B: Node.js (Local Development)
+### 📦 Option B: Pre-built Image (No Build Required)
+
+If you have a pre-exported image (e.g., from a friend or CI):
+
+```bash
+# Load the image
+docker load < linkvault-docker.tar.gz
+
+# Run it
+docker compose up -d
+```
+
+### 🐙 Option C: GitHub Container Registry (Instant)
+
+If the project publishes to GHCR:
+
+```bash
+docker pull ghcr.io/YOUR_USERNAME/linkvault:latest
+docker compose up -d
+```
+
+### 💻 Option D: Node.js (Local Development)
 
 #### 📋 Prerequisites
 
 | OS | Required Tools |
 |---|---|
-| 🍎 **macOS** | `xcode-select --install` (Command Line Tools) |
-| 🐧 **Ubuntu/Debian** | `sudo apt install build-essential python3` |
-| 🎩 **Fedora/RHEL** | `sudo dnf install gcc-c++ make python3` |
-| 🪟 **Windows** | [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) + Python 3 |
+| 🍎 **macOS** | `xcode-select --install` (rarely needed) |
+| 🐧 **Ubuntu/Debian** | Usually nothing extra needed |
+| 🎩 **Fedora/RHEL** | Usually nothing extra needed |
+| 🪟 **Windows** | Usually nothing extra needed |
 | 🌐 **All** | [Node.js 20+](https://nodejs.org/) |
 
-> ⚠️ **Note:** `better-sqlite3` compiles native C++ bindings via `node-gyp`. The build tools above are required for `npm install` to succeed.
+> 💡 `better-sqlite3` uses **prebuilt binaries** for most platforms. Build tools are only needed as a fallback if a prebuild is missing for your architecture.
 
 #### 🛠️ One-Command Setup
 
@@ -211,13 +233,13 @@ linkvault/
 
 ### ❌ `npm install` fails with `node-gyp` errors
 
-**Cause:** Native C++ compilation of `better-sqlite3` is failing.
+**Cause:** Native C++ compilation of `better-sqlite3` is falling back because a prebuilt binary is missing for your platform.
 
 **Fix:**
+- 🐳 **All platforms:** Use Docker instead (`docker compose up --build`) — no compilation needed.
 - 🍎 **macOS:** `xcode-select --install`
 - 🐧 **Ubuntu:** `sudo apt install build-essential python3`
 - 🪟 **Windows:** Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with "Desktop development with C++" workload, then `npm config set msvs_version 2022`
-- 🐳 **All platforms:** Use Docker instead (`docker compose up --build`)
 
 ### 🔴 Extension shows "Offline"
 

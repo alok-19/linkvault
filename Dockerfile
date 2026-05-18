@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
 
 # Multi-stage build for LinkVault
+# Zero build tools required — better-sqlite3 uses prebuilt binaries.
 # Requires BuildKit: DOCKER_BUILDKIT=1 or default on Docker Desktop
 
 # Stage 1: Dependencies
 FROM node:20-slim AS deps
-RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
@@ -22,7 +22,6 @@ RUN --mount=type=cache,target=/app/.next/cache \
 
 # Stage 3: Runner
 FROM node:20-slim AS runner
-RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -45,5 +44,4 @@ RUN chmod -R 777 /app/data /app/public/thumbs
 
 EXPOSE 3000
 
-ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]

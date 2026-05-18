@@ -47,3 +47,6 @@ data/*.db*
 
 # Generated thumbnails (can be regenerated)
 public/thumbs
+
+# Exported Docker images
+linkvault-docker.tar.gz
