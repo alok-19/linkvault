@@ -2,15 +2,22 @@
 
 # Multi-stage build for LinkVault
 # Zero build tools required — better-sqlite3 uses prebuilt binaries.
+# Designed to work on restricted networks: no registry pings, no npx lookups.
 
 # Stage 1: Builder
 FROM node:20-slim AS builder
 WORKDIR /app
+
+# Prevent npm from hitting the registry during the build
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npx next build
+
+# Use direct binary path instead of npx to avoid registry lookups
+RUN ./node_modules/.bin/next build
 
 # Stage 2: Runner
 FROM node:20-slim AS runner

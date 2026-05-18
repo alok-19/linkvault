@@ -49,7 +49,7 @@ docker compose up --build
 
 ### 📦 Option B: Pre-built Image (No Build Required)
 
-If you have a pre-exported image (e.g., from a friend or CI):
+If you have a pre-exported image (e.g., from a CI pipeline or archived distribution):
 
 ```bash
 # Load the image
