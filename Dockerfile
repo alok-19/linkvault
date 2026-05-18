@@ -10,7 +10,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN npx next build
 
 # Stage 2: Runner
 FROM node:20-slim AS runner
