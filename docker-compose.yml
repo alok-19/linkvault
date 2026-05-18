@@ -1,0 +1,26 @@
+services:
+  linkvault:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: linkvault
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      # Persist SQLite database and thumbnails
+      - linkvault-data:/app/data
+      - linkvault-thumbs:/app/public/thumbs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  linkvault-data:
+  linkvault-thumbs:
