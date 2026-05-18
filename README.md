@@ -31,85 +31,42 @@
 
 ## 🚀 Quick Start
 
-### 🐳 Option A: Docker (Recommended — Zero Native Dependencies)
+### ⚡ One Command — No Clone Required
 
 ```bash
-# Clone the repo
-git clone <repo-url>
+docker run -d -p 3000:3000 \
+  -v linkvault-data:/app/data \
+  -v linkvault-thumbs:/app/public/thumbs \
+  --name linkvault \
+  --restart unless-stopped \
+  ghcr.io/alok-19/linkvault:latest
+```
+
+Open **http://localhost:3000**. Data persists in Docker volumes — no build tools or Node.js needed.
+
+---
+
+### 🐳 Option A: Docker Compose (Persistent Setup)
+
+```bash
+git clone https://github.com/alok-19/linkvault.git
 cd linkvault
-
-# Build and run
-docker compose up --build
-
-# Open http://localhost:3000
+docker compose pull && docker compose up -d
 ```
 
 > 💡 Data persists in Docker volumes (`linkvault-data` and `linkvault-thumbs`).
-> No build tools (python3, make, g++) are needed — `better-sqlite3` ships prebuilt binaries.
 
-### 📦 Option B: Pre-built Image (No Build Required)
+### 🔨 Option B: Build from Source (Contributors)
 
-If you have a pre-exported image (e.g., from a CI pipeline or archived distribution):
-
-```bash
-# Load the image
-docker load < linkvault-docker.tar.gz
-
-# Run it
-docker compose up -d
-```
-
-### 🐙 Option C: GitHub Container Registry (Instant)
-
-If the project publishes to GHCR:
+For developers who want to modify the app or build their own image:
 
 ```bash
-docker pull ghcr.io/YOUR_USERNAME/linkvault:latest
-docker compose up -d
+git clone https://github.com/alok-19/linkvault.git
+cd linkvault
+docker compose up -d --build
 ```
 
-### 💻 Option D: Node.js (Local Development)
-
-#### 📋 Prerequisites
-
-| OS | Required Tools |
-|---|---|
-| 🍎 **macOS** | `xcode-select --install` (rarely needed) |
-| 🐧 **Ubuntu/Debian** | Usually nothing extra needed |
-| 🎩 **Fedora/RHEL** | Usually nothing extra needed |
-| 🪟 **Windows** | Usually nothing extra needed |
-| 🌐 **All** | [Node.js 20+](https://nodejs.org/) |
-
-> 💡 `better-sqlite3` uses **prebuilt binaries** for most platforms. Build tools are only needed as a fallback if a prebuild is missing for your architecture.
-
-#### 🛠️ One-Command Setup
-
-```bash
-# macOS / Linux
-chmod +x setup.sh
-./setup.sh
-
-# Windows (PowerShell)
-.\setup.ps1
-```
-
-#### 📝 Manual Setup
-
-```bash
-# Ensure Node 20+ is active (if using nvm/fnm)
-nvm use    # or: fnm use
-
-# Install dependencies
-npm install
-
-# Build for production
-npm run build
-
-# Run development server
-npm run dev
-
-# Open http://localhost:3000
-```
+> Requires a stable internet connection during the build to download npm packages.
 
 ---
 
@@ -236,14 +193,14 @@ linkvault/
 **Cause:** Native C++ compilation of `better-sqlite3` is falling back because a prebuilt binary is missing for your platform.
 
 **Fix:**
-- 🐳 **All platforms:** Use Docker instead (`docker compose up --build`) — no compilation needed.
+- 🐳 **All platforms:** Use Docker instead — no compilation needed. See the One Command section above.
 - 🍎 **macOS:** `xcode-select --install`
 - 🐧 **Ubuntu:** `sudo apt install build-essential python3`
 - 🪟 **Windows:** Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with "Desktop development with C++" workload, then `npm config set msvs_version 2022`
 
 ### 🔴 Extension shows "Offline"
 
-1. Ensure the dashboard is running (`npm run dev` or `docker compose up`)
+1. Ensure the dashboard is running (`npm run dev` or `docker compose up -d`)
 2. Click the ⚙️ gear icon in the extension popup and verify the URL
 3. Check that your browser can reach the URL directly
 
@@ -256,7 +213,7 @@ linkvault/
 # Remove the old volume and recreate
 docker compose down
 docker volume rm linkvault_linkvault-data
-docker compose up --build
+docker compose pull && docker compose up -d
 ```
 
 ### 🖼️ Thumbnails not generating
@@ -275,6 +232,29 @@ npm run lint       # 🔍 ESLint
 npm run test       # 🧪 Run Vitest test suite
 npm run test:watch # 👁️ Run tests in watch mode
 ```
+
+---
+
+## 💻 Local Development (Node.js)
+
+For contributors who want hot-reload dev mode. Requires [Node.js 20+](https://nodejs.org/).
+
+```bash
+git clone https://github.com/alok-19/linkvault.git
+cd linkvault
+npm install
+npm run dev       # http://localhost:3000 with hot reload
+```
+
+> 💡 `better-sqlite3` uses prebuilt binaries — no compiler needed on most platforms. If install fails, see the `node-gyp` troubleshooting entry above.
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | 🚀 Development server with Turbopack |
+| `npm run build` | 🏗️ Production build |
+| `npm run start` | ▶️ Start production server |
+| `npm run test` | 🧪 Run Vitest test suite |
+| `npm run lint` | 🔍 ESLint |
 
 ---
 
