@@ -1,5 +1,6 @@
 services:
   linkvault:
+    image: ghcr.io/alok-19/linkvault:latest
     build:
       context: .
       dockerfile: Dockerfile
