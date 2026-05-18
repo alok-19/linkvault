@@ -2,28 +2,17 @@
 
 # Multi-stage build for LinkVault
 # Zero build tools required — better-sqlite3 uses prebuilt binaries.
-# Requires BuildKit: DOCKER_BUILDKIT=1 or default on Docker Desktop
 
-# Stage 1: Dependencies
-FROM node:20-slim AS deps
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci
-
-# Stage 2: Builder
+# Stage 1: Builder
 FROM node:20-slim AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
-# Install in builder stage directly (more reliable than copying node_modules between stages)
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci
+RUN npm ci
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN --mount=type=cache,target=/app/.next/cache \
-    npm run build
+RUN npm run build
 
-# Stage 3: Runner
+# Stage 2: Runner
 FROM node:20-slim AS runner
 WORKDIR /app
 
