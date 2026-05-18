@@ -12,12 +12,11 @@ WORKDIR /app
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-
-# Use direct binary path instead of npx to avoid registry lookups
-RUN ./node_modules/.bin/next build
+RUN npm run build
 
 # Stage 2: Runner
 FROM node:20-slim AS runner
