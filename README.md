@@ -22,10 +22,18 @@
 | ⚡ **One-click save** | Chrome/Edge extension to save any page instantly |
 | 🖼️ **Visual thumbnails** | Auto-fetched OG images with smart fallbacks |
 | 🔍 **Smart search** | Full-text search across titles, URLs, descriptions, and tags |
-| 📂 **Categories & tags** | Organize links your way |
+| 📂 **Categories & tags** | Organize links your way with auto-categorization |
+| 📋 **Collections** | Shareable collection pages with OG social card images |
+| ✅ **Link status workflow** | Mark links as unread, reading, or archived |
+| 🔗 **Broken link detection** | Periodic health checks to find dead URLs |
+| 📄 **Content extraction** | Extract readable article content via Mozilla Readability |
+| 📦 **Bulk actions** | Select, delete, or change status of multiple links at once |
+| 📱 **PWA support** | Installable app with Web Share Target API |
 | 🌙 **Dark mode** | Beautiful light and dark themes |
 | 🔒 **Fully local** | No accounts, no cloud, no tracking |
 | 📊 **Click tracking** | See which links you use most |
+| 📥 **Import/Export** | JSON, CSV, HTML bookmarks, and browser bookmark import |
+| 🔄 **Offline save queue** | Extension queues saves when offline and retries automatically |
 
 ---
 
@@ -93,7 +101,7 @@ docker compose up -d --build
 If your LinkVault instance is not on `localhost:3000` (e.g., Docker on a remote machine, custom port, LAN IP):
 
 1. Click the **⚙️ gear icon** in the extension popup
-2. Enter your dashboard URL (e.g., `http://192.168.1.50:3000`)
+2. Enter your dashboard URL (e.g., `http://192.0.2.1:3000`)
 3. The extension will remember it 💾
 
 ---
@@ -122,8 +130,7 @@ linkvault/
 ├── 🐳 Dockerfile              # Multi-stage production build
 ├── 📜 docker-compose.yml      # Docker orchestration
 ├── 🔧 setup.sh                # macOS/Linux setup script
-├── 🔧 setup.ps1               # Windows setup script
-└── 📚 docs/                   # Architecture & planning docs
+└── 🔧 setup.ps1               # Windows setup script
 ```
 
 ---
@@ -150,9 +157,12 @@ linkvault/
 | `GET` | `/api/links` | 📋 List links (search, filter, sort, paginate) |
 | `POST` | `/api/links` | ➕ Add new link |
 | `GET` | `/api/links/:id` | 🔍 Get single link |
-| `PATCH` | `/api/links/:id` | ✏️ Update link |
-| `DELETE` | `/api/links/:id` | 🗑️ Delete link |
+| `PATCH` | `/api/links/:id` | ✏️ Update single link |
+| `PATCH` | `/api/links` | ✏️ Bulk update link status (accepts `{ ids, status }`) |
+| `DELETE` | `/api/links/:id` | 🗑️ Delete single link |
+| `DELETE` | `/api/links` | 🗑️ Bulk delete links (accepts `{ ids }`) |
 | `POST` | `/api/links/:id/click` | 📊 Track click |
+| `POST` | `/api/links/health-check` | 🔍 Check all links for broken URLs |
 | `POST` | `/api/extract-metadata` | 🏷️ Pre-fetch page metadata |
 | `POST` | `/api/links/:id/extract-content` | 📄 Extract article content |
 | `POST` | `/api/import` | 📥 Import JSON or HTML bookmarks |
@@ -161,7 +171,9 @@ linkvault/
 | `GET` | `/api/export/html` | 📤 Export as HTML bookmarks |
 | `GET` | `/api/stats` | 📈 Dashboard statistics |
 | `GET` | `/api/health` | 💚 Lightweight health check |
-| `POST` | `/api/links/health-check` | 🔍 Check all links for broken URLs |
+| `GET` | `/api/collections/:category` | 📚 Get links for a collection category |
+| `GET` | `/api/collections/:category/og` | 🖼️ Generate OG social card for a collection |
+| `GET` | `/api/thumbnail?url=` | 📸 Fetch/generate thumbnail for a URL |
 
 ---
 
@@ -171,6 +183,11 @@ linkvault/
 |-----|--------|
 | `/` | 🔍 Focus search |
 | `n` | ➕ New link modal |
+| `j` / `↓` | Navigate down in list |
+| `k` / `↑` | Navigate up in list |
+| `Enter` | Open selected link |
+| `x` | Select/deselect link |
+| `d` | 🗑️ Delete selected link |
 | `Esc` | ❌ Close modal / clear search |
 | `?` | ❓ Show keyboard shortcuts help |
 
@@ -225,7 +242,7 @@ The `public/thumbs/` directory must be writable. It auto-creates on startup, but
 ## 📜 Scripts
 
 ```bash
-npm run dev        # 🚀 Development server with Turbopack
+npm run dev        # 🚀 Development server
 npm run build      # 🏗️ Production build (outputs .next/standalone)
 npm run start      # ▶️ Start production server
 npm run lint       # 🔍 ESLint
@@ -247,14 +264,6 @@ npm run dev       # http://localhost:3000 with hot reload
 ```
 
 > 💡 `better-sqlite3` uses prebuilt binaries — no compiler needed on most platforms. If install fails, see the `node-gyp` troubleshooting entry above.
-
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | 🚀 Development server with Turbopack |
-| `npm run build` | 🏗️ Production build |
-| `npm run start` | ▶️ Start production server |
-| `npm run test` | 🧪 Run Vitest test suite |
-| `npm run lint` | 🔍 ESLint |
 
 ---
 
