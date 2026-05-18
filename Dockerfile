@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Multi-stage build for LinkVault
 # Zero build tools required — better-sqlite3 uses prebuilt binaries.
 # Designed to work on restricted networks: no registry pings, no npx lookups.
