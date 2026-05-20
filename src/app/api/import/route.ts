@@ -4,6 +4,7 @@ import { parseMetadataOnly } from '@/lib/page-parser';
 import { extractDomain } from '@/lib/metadata';
 import { fetchThumbnail } from '@/lib/thumbnail';
 import { normalizeUrl } from '@/lib/utils';
+import { apiCache } from '@/lib/cache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -122,6 +123,11 @@ export async function POST(request: NextRequest) {
       }
     } else {
       return NextResponse.json({ error: 'Unsupported file format. Use .json or .html' }, { status: 400 });
+    }
+
+    if (imported > 0) {
+      apiCache.invalidate('links:');
+      apiCache.invalidate('stats');
     }
 
     return NextResponse.json({

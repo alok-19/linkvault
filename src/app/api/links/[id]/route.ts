@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { linkDb } from '@/lib/db';
+import { apiCache } from '@/lib/cache';
 
 export async function GET(
   request: NextRequest,
@@ -33,6 +34,8 @@ export async function PATCH(
     }
 
     const updated = linkDb.update(parseInt(id), body);
+    apiCache.invalidate('links:');
+    apiCache.invalidate('stats');
     return NextResponse.json({ link: updated });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update link' }, { status: 500 });
@@ -52,6 +55,8 @@ export async function DELETE(
     }
 
     linkDb.delete(parseInt(id));
+    apiCache.invalidate('links:');
+    apiCache.invalidate('stats');
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete link' }, { status: 500 });

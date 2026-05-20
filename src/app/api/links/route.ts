@@ -59,6 +59,7 @@ async function backgroundEnrich(id: number, url: string) {
     if (Object.keys(updates).length > 0) {
       linkDb.update(id, updates);
       apiCache.invalidate('links:');
+      apiCache.invalidate('stats');
     }
   } catch (err) {
     console.error('Background enrichment failed for link', id, err);
@@ -167,6 +168,7 @@ export async function POST(request: NextRequest) {
     }
 
     apiCache.invalidate('links:');
+    apiCache.invalidate('stats');
 
     return noCacheJson({ link }, 201);
   } catch (error) {
@@ -190,6 +192,7 @@ export async function PATCH(request: NextRequest) {
 
     const result = linkDb.updateStatus(ids, status);
     apiCache.invalidate('links:');
+    apiCache.invalidate('stats');
 
     return noCacheJson(result);
   } catch (error) {
@@ -209,6 +212,7 @@ export async function DELETE(request: NextRequest) {
 
     const result = linkDb.deleteMany(ids);
     apiCache.invalidate('links:');
+    apiCache.invalidate('stats');
 
     return noCacheJson(result);
   } catch (error) {

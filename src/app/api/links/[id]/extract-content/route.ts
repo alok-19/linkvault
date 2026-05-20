@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { linkDb } from '@/lib/db';
 import { parsePage } from '@/lib/page-parser';
+import { apiCache } from '@/lib/cache';
 
 export async function POST(
   request: NextRequest,
@@ -31,6 +32,9 @@ export async function POST(
       content: parsed.textContent.slice(0, 50000),
       reading_time: parsed.readingTime,
     });
+
+    apiCache.invalidate('links:');
+    apiCache.invalidate('stats');
 
     return NextResponse.json({ link: updated, extracted: true });
   } catch (error) {

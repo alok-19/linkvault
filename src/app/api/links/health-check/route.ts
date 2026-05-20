@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { linkDb } from '@/lib/db';
+import { apiCache } from '@/lib/cache';
 
 export async function POST() {
   try {
@@ -40,6 +41,9 @@ export async function POST() {
     }
 
     const brokenCount = results.filter(r => r.status === 'broken').length;
+
+    apiCache.invalidate('links:');
+    apiCache.invalidate('stats');
 
     return NextResponse.json({
       checked: results.length,
